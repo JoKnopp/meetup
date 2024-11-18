@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from typing import Iterator, Iterable, NamedTuple
+from typing import Callable, Iterator, Iterable, NamedTuple, Optional
 
 import click
 import re
@@ -14,6 +14,9 @@ class DigitSearchResult(NamedTuple):
     digit: str
     start: int
     end: str
+
+
+DigitFinder = Callable[[str, int], Optional[DigitSearchResult]]
 
 
 CHARACTERS_TO_DIGIT = {
@@ -95,13 +98,15 @@ def find_next_digit_gpt4(text: str, offset: int = 0) -> int:
         return None  # No occurrence found
 
 
-def find_first_and_last_digit(line: str) -> tuple[int, int]:
-    first_digit_result: DigitSearchResult = find_next_digit_gpt4(line)
+def find_first_and_last_digit(line: str, digit_finder: DigitFinder) -> tuple[int, int]:
+    first_digit_result: DigitSearchResult = digit_finder(line, 0)
     if first_digit_result is None:
         raise ValueError(f"At least one digit expected on each line. Found none for {line=}")
+
     last_digit_result = first_digit_result
-    while next_digit := find_next_digit_gpt4(line, offset=last_digit_result.start + 1):
+    while next_digit := digit_finder(line, offset=last_digit_result.start + 1):
         last_digit_result = next_digit
+
     return first_digit_result.digit, last_digit_result.digit
 
 
@@ -109,18 +114,26 @@ def digits_to_number(digit1: str, digit2: str) -> int:
     return int(f"{digit1}{digit2}")
 
 
-def compute_result(lines: Iterable) -> int:
+def compute_result(lines: Iterable, digit_finder: DigitFinder = find_next_digit) -> int:
     result = 0
     for line in lines:
-        d1, d2 = find_first_and_last_digit(line)
+        d1, d2 = find_first_and_last_digit(line, digit_finder)
         result += digits_to_number(d1, d2)
     return result
 
 
+DIGIT_FINDER_BY_NAME = {
+    "programmer": find_next_digit,
+    "gpt": find_next_digit_gpt4,
+}
+
+
 @click.command()
 @click.argument("inputfile", type=click.File())
-def cli(inputfile) -> None:
-    print(compute_result(read_input(inputfile)))
+@click.option("--digit-finder", type=click.Choice(("programmer", "gpt")), default="programmer")
+def cli(inputfile, digit_finder) -> None:
+    digit_finder_func = DIGIT_FINDER_BY_NAME[digit_finder]
+    print(compute_result(read_input(inputfile), digit_finder=digit_finder_func))
 
 
 if __name__ == "__main__":
