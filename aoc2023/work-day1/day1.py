@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 from typing import Iterator, Iterable
 
+import click
 
-def read_input(fname: str) -> Iterator[str]:
-    with open(fname) as f:
-        for line in f:
-            yield line
+
+def read_input(f: click.File) -> Iterator[str]:
+    for line in f:
+        yield line.rstrip()
 
 
 def find_first_and_last_digit(line: str) -> tuple[int, int]:
@@ -35,10 +36,10 @@ def compute_result(lines: Iterable) -> int:
     return result
 
 
-def cli() -> None:
-    print(
-        compute_result(read_input("data/input.txt"))
-    )
+@click.command()
+@click.argument("inputfile", type=click.File())
+def cli(inputfile) -> None:
+    print(compute_result(read_input(inputfile)))
 
 
 if __name__ == "__main__":
