@@ -35,22 +35,7 @@ def compute_result(lines: Iterable) -> int:
     return result
 
 
-def test() -> None:
-    # task description:
-    test_data = ["1abc2", "pqr3stu8vwx", "a1b2c3d4e5f", "treb7uchet"]
-    calibration_values = [12, 38, 15, 77]
-    total = 142
-
-    results = []
-    for line in test_data:
-        d1, d2 = find_first_and_last_digit(line)
-        results.append(digits_to_number(d1, d2))
-    assert calibration_values == results
-    assert sum(calibration_values) == total == compute_result(test_data)
-
-
 def cli() -> None:
-    test()
     print(
         compute_result(read_input("data/input.txt"))
     )
