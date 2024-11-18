@@ -52,7 +52,7 @@ def find_next_digit(text: str, offset: int = 0) -> DigitSearchResult:
 def find_first_and_last_digit(line: str) -> tuple[int, int]:
     first_digit_result: DigitSearchResult = find_next_digit(line)
     last_digit_result = first_digit_result
-    while next_digit := find_next_digit(line, offset=last_digit_result.end):
+    while next_digit := find_next_digit(line, offset=last_digit_result.start + 1):
         last_digit_result = next_digit
     return first_digit_result.digit, last_digit_result.digit
 
