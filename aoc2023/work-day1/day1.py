@@ -2,7 +2,13 @@
 from typing import Callable, Iterator, Iterable, NamedTuple, Optional
 
 import click
+import functools
 import re
+
+
+def compose(*functions: str) -> str:
+    """Composes functions into a single function"""
+    return functools.reduce(lambda f, g: lambda x: g(f(x)), functions)
 
 
 def read_input(f: click.File) -> Iterator[str]:
@@ -126,12 +132,21 @@ DIGIT_FINDER_BY_NAME = {
 }
 
 
+def create_processor(config):
+    return compose(
+        read_input,
+        functools.partial(process_lines, digit_finder=config["digit-finder"]),
+        sum,
+    )
+
+
 @click.command()
 @click.argument("inputfile", type=click.File())
 @click.option("--digit-finder", type=click.Choice(("programmer", "gpt")), default="programmer")
 def cli(inputfile, digit_finder) -> None:
-    digit_finder_func = DIGIT_FINDER_BY_NAME[digit_finder]
-    print(sum(process_lines(read_input(inputfile), digit_finder=digit_finder_func)))
+    config = {"digit-finder": DIGIT_FINDER_BY_NAME[digit_finder]}
+    processor = create_processor(config)
+    print(processor(inputfile))
 
 
 if __name__ == "__main__":
