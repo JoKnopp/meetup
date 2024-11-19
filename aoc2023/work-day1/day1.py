@@ -114,12 +114,10 @@ def digits_to_number(digit1: str, digit2: str) -> int:
     return int(f"{digit1}{digit2}")
 
 
-def compute_result(lines: Iterable, digit_finder: DigitFinder = find_next_digit) -> int:
-    result = 0
+def process_lines(lines: Iterable, digit_finder: DigitFinder = find_next_digit) -> list[int]:
     for line in lines:
         d1, d2 = find_first_and_last_digit(line, digit_finder)
-        result += digits_to_number(d1, d2)
-    return result
+        yield digits_to_number(d1, d2)
 
 
 DIGIT_FINDER_BY_NAME = {
@@ -133,7 +131,7 @@ DIGIT_FINDER_BY_NAME = {
 @click.option("--digit-finder", type=click.Choice(("programmer", "gpt")), default="programmer")
 def cli(inputfile, digit_finder) -> None:
     digit_finder_func = DIGIT_FINDER_BY_NAME[digit_finder]
-    print(compute_result(read_input(inputfile), digit_finder=digit_finder_func))
+    print(sum(process_lines(read_input(inputfile), digit_finder=digit_finder_func)))
 
 
 if __name__ == "__main__":
