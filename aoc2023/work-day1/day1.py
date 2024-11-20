@@ -126,11 +126,19 @@ DIGIT_FINDER_BY_NAME = {
 }
 
 
+def yielding_printer(lines):
+    for line in lines:
+        print(line)
+        yield line
+
+
+
 def create_processor(config):
     return compose(
         read_input,
         lambda lines: (find_first_and_last_digit(line, config["digit-finder"]) for line in lines),
         lambda digits: (digits_to_number(d1, d2) for d1, d2 in digits),
+        yielding_printer,
         sum,
     )
 
