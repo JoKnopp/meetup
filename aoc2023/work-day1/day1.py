@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from typing import Callable, Iterator, Iterable, NamedTuple, Optional
+from typing import Callable, Iterator, NamedTuple, Optional
 
 import click
 import functools
@@ -120,12 +120,6 @@ def digits_to_number(digit1: str, digit2: str) -> int:
     return int(f"{digit1}{digit2}")
 
 
-def process_lines(lines: Iterable, digit_finder: DigitFinder = find_next_digit) -> list[int]:
-    for line in lines:
-        d1, d2 = find_first_and_last_digit(line, digit_finder)
-        yield digits_to_number(d1, d2)
-
-
 DIGIT_FINDER_BY_NAME = {
     "programmer": find_next_digit,
     "gpt": find_next_digit_gpt4,
@@ -135,7 +129,8 @@ DIGIT_FINDER_BY_NAME = {
 def create_processor(config):
     return compose(
         read_input,
-        functools.partial(process_lines, digit_finder=config["digit-finder"]),
+        lambda lines: (find_first_and_last_digit(line, config["digit-finder"]) for line in lines),
+        lambda digits: (digits_to_number(d1, d2) for d1, d2 in digits),
         sum,
     )
 

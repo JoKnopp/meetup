@@ -1,6 +1,5 @@
 import day1
 import pytest
-from functools import partial
 
 
 @pytest.mark.parametrize(
@@ -12,15 +11,8 @@ from functools import partial
     ],
 )
 @pytest.mark.parametrize("digit_finder", day1.DIGIT_FINDER_BY_NAME.values())
-class TestDay1:
-    def test_day1(self, fname, calibration_values, digit_finder) -> None:
-        with open(fname) as f:
-            test_data = day1.read_input(f)
-            results = list(day1.process_lines(test_data, digit_finder=digit_finder))
-        assert calibration_values == results
-
-    def test_pipeline(self, fname, calibration_values, digit_finder) -> None:
-        processor = day1.create_processor({"digit-finder": digit_finder})
-        with open(fname) as f:
-            test_data = day1.read_input(f)
-            assert sum(calibration_values) == processor(test_data)
+def test_pipeline(fname, calibration_values, digit_finder) -> None:
+    processor = day1.create_processor({"digit-finder": digit_finder})
+    with open(fname) as f:
+        test_data = day1.read_input(f)
+        assert sum(calibration_values) == processor(test_data)
