@@ -59,6 +59,11 @@ def find_next_digit(text: str, offset: int = 0) -> DigitSearchResult:
     return result
 
 
+# Define regex patterns for digits (1-9) and written numbers without word boundaries
+DIGIT_PATTERN = re.compile(r"[1-9]")
+WORD_PATTERN = re.compile(r"one|two|three|four|five|six|seven|eight|nine")
+
+
 def find_next_digit_gpt4(text: str, offset: int = 0) -> int:
     # Define a dictionary to map written words to their corresponding digits
     word_to_digit = {
@@ -73,18 +78,14 @@ def find_next_digit_gpt4(text: str, offset: int = 0) -> int:
         "nine": "9",
     }
 
-    # Define regex patterns for digits (1-9) and written numbers without word boundaries
-    digit_pattern = re.compile(r"[1-9]")
-    word_pattern = re.compile(r"one|two|three|four|five|six|seven|eight|nine")
-
     # Exclude portion of text before the offset for matching
     searchable_text = text[offset:]
 
     # Search for the first occurrence of a digit
-    digit_match = digit_pattern.search(searchable_text)
+    digit_match = DIGIT_PATTERN.search(searchable_text)
 
     # Search for the first occurrence of a written number
-    word_match = word_pattern.search(searchable_text)
+    word_match = WORD_PATTERN.search(searchable_text)
 
     # Find positions
     digit_index = digit_match.start() + offset if digit_match else float("inf")
